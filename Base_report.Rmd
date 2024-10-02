@@ -1,0 +1,148 @@
+---
+title: "Individualno poročilo"
+header-includes: 
+  - \usepackage{fancyhdr}
+output:
+  pdf_document: default
+params: 
+  participantID: 0
+---
+\addtolength{\headheight}{1.0cm} 
+\fancypagestyle{plain}{} 
+\thispagestyle{fancy} 
+\fancyhead[L]{\includegraphics[width = 500pt]{project_logo.png}}
+\renewcommand{\headrulewidth}{0pt} 
+
+```{r echo=FALSE, fig.align = "center"}
+
+mydata <- read.csv("mydata_example.csv")
+
+
+```
+
+Spoštovani `r params$participantID`,
+
+pred vami je poročilo, ki sestoji iz aktualnih smernic za zdravo 24-urno gibalno vedenje odraslih in vaših rezultatov iz raziskave z merilniki gibanja. Poročilo je bilo izdelano izključno za vas in ne bo posredovano tretji osebi. V želji, da boste prepoznali koristi poročila, se vam zahvaljujemo za sodelovanje in vas lepo pozdravljamo!
+
+
+## Smernice za zdravo 24-urno gibalno vedenje odraslih
+
+Za zdravje in dobro počutje je potrebna ravno prava mera gibanja in počitka, zato sodobne smernice za zdravo 24-urno gibalno vedenje vključujejo priporočila za telesno dejavnost, sedentarno vedenje in spanje. Doseganje smernic je povezano s številnimi koristmi za telesno in duševno zdravje, med drugim pomembno prispeva k preprečevanju in obvladovanju srčno-žilnih obolenj, sladkorne bolezni tipa 2, debelosti, mišično-skeletne bolečine in nekaterih vrst raka. Doseganje smernic pomaga tudi pri obvladovanju vsakodnevnega stresa in izboljšanju kakovosti življenja.\newline
+
+```{r echo=FALSE, out.width = "100%", fig.align = "center"}
+knitr::include_graphics("24h_smernice.png")
+
+```
+
+Za boljše razumevanje smernic opredeljujemo nekatere izraze.\newline
+**Zmerno-do-visoko intenzivna telesna dejavnost** je tista telesna dejavnost, ki pospeši vaše dihanje in srčni utrip (primeri aktivnosti: hitra hoja, tek, kolesarjenje, telovadba, telesno napornejše delo na vrtu).\newline
+**Nizko intenzivna telesna dejavnost** je tista telesna dejavnost, pri kateri vaše dihanje in srčni utrip nista opazneje pospešena (primeri aktivnosti: počasna hoja, stoja, kuhanje, nakupovanje).\newline
+**Sedentarno vedenje** je vsakršno vedenje v času budnosti, pri katerem sedite ali ležite in razmeroma mirujete (primeri aktivnosti: gledanje televizije, delo na računalniku, branje knjige, vožnja z avtomobilom).
+\pagebreak
+
+## Vaši izmerjeni rezultati
+
+```{r echo=FALSE}
+c <- mydata %>%
+    # b1. Filter the dataset by an specific ID:
+  filter(Ime_priimek == params$participantID)
+  
+```
+
+Na podlagi rezultatov merilnika gibanja v povprečju spite **`r round(mean(c$SLEEP), digits = 1)` ur na dan**, ste sedentarni **`r round(mean(c$SB), digits = 1)` ur na dan**, nizko intenzivno telesno dejavni **`r round(mean(c$LPA), digits = 1)` ur na dan** in zmerno-do-visoko intenzivno telesno dejavni **`r round(mean(c$MVPA), digits = 1)` minut na dan**. Rezultati kažejo, da `r ifelse(round(mean(c$SLEEP), digits = 1) >= 7 & round(mean(c$SLEEP), digits = 1) < 10, "dosegate priporočilo za spanje", "ne dosegate priporočila za spanje")`, `r ifelse(round(mean(c$SB), digits = 1) > 8, "ne dosegate priporočila za sedentarno vedenje", "dosegate priporočilo za sedentarno vedenje")` in `r ifelse(round(mean(c$MVPA), digits = 1) < 21.3, "ne dosegate priporočila za zmerno-do-visoko intenzivno telesno dejavnost", "dosegate priporočilo za zmerno-do-visoko intenzivno telesno dejavnost")`.
+`r ifelse(round(mean(c$SLEEP), digits = 1) >= 7 & round(mean(c$SLEEP), digits = 1) < 10 & round(mean(c$SB), digits = 1) < 8 & round(mean(c$MVPA), digits = 1) >= 21.3, "Čestitamo za doseganje priporočil, samo tako naprej!", "Spodbujamo vas, da dosežete vsa priporočila! Vsaka sprememba v gibalnem vedenju, ki vas bo približala doseganju priporočil, bo koristna za zdravje!")`
+
+
+```{r echo=FALSE, fig.align = "center"}
+
+  # b2. Create a plot
+sl <- ggplot(c, aes(y=SLEEP,x=factor(Date, levels = unique(Date)), width= 0.5)) +
+  geom_col(fill='#1168b1') +
+  ylab('ur na dan') +
+  xlab('') +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  theme_classic(base_size = 8) +
+  ggtitle("Spanje") +
+  theme(plot.title = element_text(size = 8, face = "bold"),
+          axis.text=element_text(size=8),
+        text = element_text(family = "serif")) +
+  geom_hline(yintercept=7, linetype="dotted", 
+                color = "black", linewidth=0.3)
+
+
+
+# b2. Create a plot
+sb <- ggplot(c, aes(y=SB,x=factor(Date, levels = unique(Date)), width= 0.5)) +
+  geom_col(fill='#f0961e') +
+  ylab('ur na dan') +
+  xlab('') +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  theme_classic(base_size = 8) +
+  ggtitle("Sedentarno vedenje") +
+  theme(plot.title = element_text(size = 8, face = "bold"),
+          axis.text=element_text(size=8),
+        text = element_text(family = "serif")) +
+  geom_hline(yintercept=8, linetype="dotted", 
+                color = "black", linewidth=0.3)
+
+
+
+# b2. Create a plot
+lpa <- ggplot(c, aes(y=LPA,x=factor(Date, levels = unique(Date)), width= 0.5)) +
+  geom_col(fill='#319447') +
+  ylab('ur na dan') +
+  xlab('') +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  theme_classic(base_size = 8) +
+  ggtitle("Nizko intenzivna telesna dejavnost") +
+  theme(plot.title = element_text(size = 8, face = "bold"),
+          axis.text=element_text(size=8),
+        text = element_text(family = "serif")) +
+  geom_hline(yintercept=3, linetype="dotted", 
+                color = "black", linewidth=0.3)
+
+
+
+ # b2. Create a plot
+mvpa <-  ggplot(c, aes(y=MVPA,x=factor(Date, levels = unique(Date)), width= 0.5)) +
+  geom_col(fill='#b4246c') +
+  ylab('minut na dan') +
+  xlab('') +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  theme_classic(base_size = 8) +
+  ggtitle("Zmerno-do-visoko intenzivna telesna dejavnost") +
+  theme(plot.title = element_text(size = 8, face = "bold"),
+          axis.text=element_text(size=8),
+        text = element_text(family = "serif")) +
+  geom_hline(yintercept=21, linetype="dotted", 
+                color = "black", linewidth=0.3)
+
+
+four_graphs <- ggarrange(sl, sb, lpa, mvpa, nrow = 2, ncol = 2)
+
+  # b3. Save the plot with ggsave as a ".png" figure
+  ggsave("four_graphs.png", four_graphs, height = 4, width = 6, bg = "white")
+
+  # b4. Import it with knitr::include_graphics()
+  knitr::include_graphics("four_graphs.png")
+  
+
+```
+
+Na naslednji strani prilagamo še poglobljen izpis vašega 24-urnega gibalnega vedenja. Iz izpisa lahko med drugim razberete kateri del dneva ste bolj telesno dejavni (prikazuje rdeča in zelena barva), sedentarni (prikazuje rumena barva) in kateri del dneva spite (prikazuje modra barva). 
+`r ifelse(round(mean(c$SB), digits = 1) < 8 & round(mean(c$MVPA), digits = 1) >= 21.3, "", "Priporoča se vzdrževanje stalnega časa večernega uspavanja in jutranjega prebujanja tako ob delavnikih kot tudi ob koncu tedna. V dele dneva, ki jih preživite izrazito sedentarno skušajte vnesti več telesne dejavnosti katerekoli intenzivnosti. Bodite zmerno-do-visoko intenzivno telesno dejavni preko dneva, vendar ne pozno zvečer pred spanjem.")`\newline\newline\newline\newline\newline\newline\newline
+
+
+Projekt so financirali
+```{r echo=FALSE, out.width = "50%", fig.align = "left"}
+knitr::include_graphics("funders_logo.png")
+```
+
+
+```{r echo=FALSE}
+name <- c[1, 1]
+knitr::include_graphics(path = paste("activPAL_example/analysis/pdf_CREA/", name, ".pdf", sep = "")) # generate Epochs (day per row) PDFs using PALbatch and name it by participant's ID
+
+```
+
+

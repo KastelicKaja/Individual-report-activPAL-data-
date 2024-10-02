@@ -1,0 +1,65 @@
+---
+title: "Individual reports - the script that run other script"
+author: "Kaja Kastelic"
+date: "2024-07-10"
+output: pdf
+---
+```{r packages}
+# Packages
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(ggpubr)
+library(readxl)
+
+#update.packages(ask = FALSE, checkBuilt = TRUE)
+#tinytex::tlmgr_update()
+
+```
+
+```{r import data}
+mydata <- read.csv("DailySummaryOutcomes-example.csv") #import data for all participants (use PALbatch software, export DailySummaryOutcomes)
+
+
+mydata <- mydata %>%  #remove non-valid days
+  filter(ValidDay == 1)
+
+#calculate 24-h movement behaviours
+mydata$SLEEP <- mydata$PrimaryLyingTime.m./60
+mydata$SB <- mydata$TotalSedentaryTime.m./60
+mydata$MVPA <- rowSums(mydata[ , c(66:75)], na.rm=TRUE) # MVPA is calculated as walking cadence 100 or more
+mydata$LPA <- 24 - mydata$SLEEP - mydata$SB - mydata$MVPA/60 - mydata$NonWearTime.m./60
+
+# create new id column
+mydata$id <- substr(mydata$Filename, 1, 6)  # Extract first six characters (exm. exm001)
+
+#Import participant's names
+evidenca <- read_excel("ParticipantsNames-example.xlsx") #you need to avoid having two spaces between name and surname (if you have it, the tex document will not be created, so pdf report will not be created)
+
+mydata <- merge(mydata, evidenca, by="id")
+
+write.csv(mydata, "mydata_example.csv", row.names=FALSE)
+
+
+```
+
+
+```{r do the thing}
+
+mydata <- read.csv("mydata_example.csv")
+
+
+for (i in unique(mydata$Ime_priimek)) {
+  rmarkdown::render(
+    input = "Base_report.Rmd",              # 1. Search for your base report
+    output_format = "pdf_document",         # 2. Establish the format
+    output_file = paste0(i ,"_porocilo.pdf"), # 3. Define the output file name
+    output_dir = "Individualna_porocila",                       # 4. Define an output folder/directory
+    params = list(participantID = i))       # 5. Integrate your parameters
+}
+
+
+```
+
+
+
